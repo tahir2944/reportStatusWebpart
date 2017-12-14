@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev.office.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "report-status-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/reportStatus/ReportStatusWebPart.js",
+          "manifest": "./src/webparts/reportStatus/ReportStatusWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "ReportStatusWebPartStrings": "lib/webparts/reportStatus/loc/{locale}.js"
+  }
+}
