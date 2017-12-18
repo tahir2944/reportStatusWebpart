@@ -21,7 +21,8 @@ export default class ReportStatusWebPart extends BaseClientSideWebPart<IReportSt
     const element: React.ReactElement<IReportStatusProps > = React.createElement(
       ReportStatus,
       {
-        description: this.properties.description
+        description: this.properties.description,
+        pageContext: this.context.pageContext        
       }
     );
 
