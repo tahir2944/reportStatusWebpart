@@ -5,6 +5,7 @@ import {
   BaseClientSideWebPart,
   IPropertyPaneConfiguration,
   PropertyPaneTextField
+  
 } from '@microsoft/sp-webpart-base';
 
 import * as strings from 'ReportStatusWebPartStrings';
@@ -13,6 +14,7 @@ import { IReportStatusProps } from './components/IReportStatusProps';
 
 export interface IReportStatusWebPartProps {
   description: string;
+  
 }
 
 export default class ReportStatusWebPart extends BaseClientSideWebPart<IReportStatusWebPartProps> {
