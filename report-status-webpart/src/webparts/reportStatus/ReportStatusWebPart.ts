@@ -11,13 +11,26 @@ import {
 import * as strings from 'ReportStatusWebPartStrings';
 import ReportStatus from './components/ReportStatus';
 import { IReportStatusProps } from './components/IReportStatusProps';
-
+import { SPComponentLoader } from '@microsoft/sp-loader';
 export interface IReportStatusWebPartProps {
   description: string;
   
 }
 
 export default class ReportStatusWebPart extends BaseClientSideWebPart<IReportStatusWebPartProps> {
+
+  public constructor() {
+    super();
+    SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css');
+    SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css');
+    
+    SPComponentLoader.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js', { globalExportsName: 'jQuery' }).then((jQuery: any): void => {
+      SPComponentLoader.loadScript('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js',  { globalExportsName: 'jQuery' }).then((): void => {        
+      });
+    });
+    
+
+  }
 
   public render(): void {
     const element: React.ReactElement<IReportStatusProps > = React.createElement(
