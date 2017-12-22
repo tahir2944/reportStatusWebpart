@@ -12,6 +12,8 @@ import * as strings from 'ReportStatusWebPartStrings';
 import ReportStatus from './components/ReportStatus';
 import { IReportStatusProps } from './components/IReportStatusProps';
 import { SPComponentLoader } from '@microsoft/sp-loader';
+import * as reactbootstrap from 'react-bootstrap';
+
 export interface IReportStatusWebPartProps {
   description: string;
   
@@ -37,7 +39,8 @@ export default class ReportStatusWebPart extends BaseClientSideWebPart<IReportSt
       ReportStatus,
       {
         description: this.properties.description,
-        pageContext: this.context.pageContext        
+        pageContext: this.context.pageContext,
+        usermail:this.context.pageContext.user.email    
       }
     );
 

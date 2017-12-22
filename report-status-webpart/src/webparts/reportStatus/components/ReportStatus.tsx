@@ -20,41 +20,13 @@ import { PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 import { FileInput, SVGIcon } from 'react-md';
 import { FocusZone } from 'office-ui-fabric-react/lib/FocusZone';
 import { List } from 'office-ui-fabric-react/lib/List';
-import RaisedButton from 'material-ui/RaisedButton';
 import { SPComponentLoader } from '@microsoft/sp-loader';
+import {Button} from 'react-bootstrap';
 
 
 let _items:any[]=[];
 
-// let _columns: IColumn[] = [
-//   {
-//     key: 'column1',
-//     name: 'ReportName',
-//     fieldName: 'Title',
-//     minWidth: 100,
-//     maxWidth: 200,
-//     isResizable: true,
-//     ariaLabel: 'Operations for name'
-//   },
-//   {
-//     key: 'column2',
-//     name: 'Frequency',
-//     fieldName: 'Frequency',
-//     minWidth: 100,
-//     maxWidth: 200,
-//     isResizable: true,
-//     ariaLabel: 'Operations for value'
-//   },
-//   {
-//     key: 'column3',
-//     name: 'LastUpdated',
-//     fieldName: 'LastUpdated',
-//     minWidth: 100,
-//     maxWidth: 200,
-//     isResizable: true,
-//     ariaLabel: 'Operations for value'
-//   },
-// ];
+
 
 let _columns: IColumn[] = [
   {
@@ -83,6 +55,15 @@ let _columns: IColumn[] = [
     maxWidth: 200,
     isResizable: true,
     ariaLabel: 'Operations for value'
+  },
+  {
+    key: 'column4',
+    name: 'Status',
+    fieldName: 'status',
+    minWidth: 100,
+    maxWidth: 200,
+    isResizable: true,
+    ariaLabel: 'Operations for status'
   }
   
 ];
@@ -101,6 +82,10 @@ let _options =
 });
 let optionkey;
 let itemss;
+let today;
+let datem;
+
+let partials;
 
 
 
@@ -121,20 +106,19 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
     });
     
 
-    // Populate with items for demos.
     
-    pnp.sp.web.lists.getByTitle("Schedule").items.get().then((itemss: any[]) => {
-      itemss = itemss.map(person => ({ key: person.ID, name: person.Title, frequency:person.Frequency, value:person.Modified.substring(0, person.Modified.indexOf('T')) }));
-     
+    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days").expand("Frequency").get().then((itemss: any[]) => {
+      console.log("look",itemss);
+
+      itemss = itemss.map(person => ({ key: person.ID, name: person.Title, frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}));
+      //console.log(">>>>>>>>>>>>>>>>>",itemss[0].datem,itemss[0].today,(itemss[0].datem-itemss[0].today));
       _items=itemss;
       this.setState({
         items: _items
       });
       console.log(_items,'listitemss',itemss);
-    
-     
-    });
-         
+      
+  });    
     
 
     this._selection = new Selection({
@@ -144,7 +128,8 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
     this.state = {
       items: _items,
       selectionDetails: this._getSelectionDetails(),
-      isDisabled:true
+      isDisabled:true,
+      userlist:''
     };
   }
 
@@ -152,61 +137,82 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
   
   public render(): React.ReactElement<IReportStatusProps> {
     //let { items, selectionDetails } = this.state;
+
+    
     let items = this.state.items;
     let selectionDetails = this.state.selectionDetails;
+    pnp.sp.web.lists.getByTitle("UserInfo").items.get().then((itemsl: any[]) => {
+      itemsl = itemsl.map(user => ({ key: user.ID, name: user.Title ,email:user.Email,role:user.role}));
+      itemsl = itemsl.filter(i => i.email.toLowerCase() == this.props.usermail.toLowerCase())[0];
+      this.setState({ userlist: itemsl });
+    });
+   
+    if(this.state.userlist.role=='manager'){
+        var partials = <div>
+                          <TextField
+                            label='Filter by name:'
+                            onChanged={ this._onChanged }
+                          />
+                            
+                            <MarqueeSelection selection={ this._selection }>
+                            <div>
+                            <DetailsList 
+                              items={ items }
+                              columns={ _columns }
+                              setKey='set'
+                              layoutMode={ DetailsListLayoutMode.fixedColumns }
+                              selection={ this._selection }
+                              selectionPreservedOnEmptyClick={ true }
+                              ariaLabelForSelectionColumn='Toggle selection'
+                              ariaLabelForSelectAllCheckbox='Toggle selection for all items'
+                              onItemInvoked={ this._onItemInvoked }
+                              // onRenderItemColumn={ _renderItemColumn }
+                            /></div>
+                            </MarqueeSelection>
+                        </div>
+    }
+    else{
+        partials = <div>
+                      <div className="row" style={{ paddingTop: "16px"}}>
+                        <div className="col-md-6">
+                      <Dropdown
+                          className='Dropdown-example'
+                          placeHolder='Select a Report Name'
+                          label=''
+                          id='Basicdrop1'
+                          ariaLabel='Basic dropdown example'
+                          options={_options}
+                          onChanged={ this._dropDownSelected }
+                          onBlur={ this._log('onBlur called') }
+                        
+                        />
+                        </div>
+                        <div className="col-md-6">
+                            <div>
+                              <input type="file" onChange={(e) => this.handleFileUpload(e.target)}  />
+                            </div>
+                        </div>    
+                      </div>
+                      <div  style={{ textAlign: "center", paddingTop: "12px"}}>
+                          <button type="button" id="uploadrepo" disabled={this.state.isDisabled} className="btn btn-danger" onClick={() => this.uploadattach(optionkey)}><i className="fa fa-upload"></i> &nbsp;Upload Report</button>
+                      </div>
+                  </div>
+    }
     
     return (
       <div style={{visibility:"visible"}}>
           <div style={{ textAlign: "center", borderBottom:"1px dotted"}}>
             <h4>User Report Screen</h4>
           </div>
-      <div className="row" style={{ paddingTop: "16px"}}>
-        <div className="col-md-6">
-      <Dropdown
-          className='Dropdown-example'
-          placeHolder='Select a Report Name'
-          label=''
-          id='Basicdrop1'
-          ariaLabel='Basic dropdown example'
-          options={_options}
-          onChanged={ this._dropDownSelected }
-          onBlur={ this._log('onBlur called') }
+            {partials}
+          
+
          
-        />
-        </div>
-        <div className="col-md-6">
-            <div>
-              <input type="file" onChange={(e) => this.handleFileUpload(e.target)}  />
-            </div>
-        </div>    
-      </div>
-      <div  style={{ textAlign: "center", paddingTop: "12px"}}>
-          <button type="button" id="uploadrepo" disabled={this.state.isDisabled} className="btn btn-danger" onClick={() => this.uploadattach(optionkey)}><i className="fa fa-upload"></i> &nbsp;Upload Report</button>
-      </div>
-      
-      <TextField
-        label='Filter by name:'
-        onChanged={ this._onChanged }
-      />
-        
-        <MarqueeSelection selection={ this._selection }>
-        <DetailsList
-          items={ items }
-          columns={ _columns }
-          setKey='set'
-          layoutMode={ DetailsListLayoutMode.fixedColumns }
-          selection={ this._selection }
-          selectionPreservedOnEmptyClick={ true }
-          ariaLabelForSelectionColumn='Toggle selection'
-          ariaLabelForSelectAllCheckbox='Toggle selection for all items'
-          onItemInvoked={ this._onItemInvoked }
-        />
-        </MarqueeSelection>
-              
     </div>
   );
   }
   
+
   @autobind
   private _dropDownSelected(option: IDropdownOption) {
     optionkey=option.key;
@@ -297,3 +303,21 @@ private uploadattach(optionkey): void {
 
 
 }
+// function _renderItemColumn(item: any, index: number, column: IColumn) {
+
+//   let fieldContent = item.status>=0 ? 'green':'red';
+//   console.log('column',column,'item',item,'index',index,'fieldContent',fieldContent);
+//   if (column.key=='column4') {
+//     return <span  style={ { color: fieldContent } }>{ item.status }</span>;
+//   }
+//   if (column.key=='column3') {
+//     return <span >{ item.value }</span>;
+//   }
+//   if (column.key=='column2') {
+//     return <span >{ item.frequency }</span>;
+//   }
+//   if (column.key=='column1') {
+//     return <span >{ item.name }</span>;
+//   }
+  
+//   }
