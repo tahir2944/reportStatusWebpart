@@ -41,6 +41,25 @@ let _columns: IColumn[] = [
   },
   {
     key: 'column2',
+    name: 'Area',
+    fieldName: 'area',
+    minWidth: 100,
+    maxWidth: 200,
+    isResizable: true,
+    ariaLabel: 'Operations for area'
+  },
+  {
+    key: 'column3',
+    name: 'Responsibility',
+    fieldName: 'responsibility',
+    minWidth: 100,
+    maxWidth: 200,
+    isResizable: true,
+    ariaLabel: 'Operations for responsibility'
+  },
+
+  {
+    key: 'column4',
     name: 'Frequency',
     fieldName: 'frequency',
     minWidth: 100,
@@ -49,7 +68,7 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for frequency'
   },
   {
-    key: 'column3',
+    key: 'column5',
     name: 'LastUpdated',
     fieldName: 'value',
     minWidth: 100,
@@ -58,13 +77,22 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for value'
   },
   {
-    key: 'column4',
+    key: 'column6',
     name: 'Status',
     fieldName: 'status',
     minWidth: 100,
     maxWidth: 200,
     isResizable: true,
     ariaLabel: 'Operations for status'
+  },
+  {
+    key: 'column7',
+    name: 'Download',
+    fieldName: 'download',
+    minWidth: 100,
+    maxWidth: 200,
+    isResizable: true,
+    ariaLabel: 'Operations for download'
   }
   
 ];
@@ -77,6 +105,7 @@ let _options =
   ];
 
   pnp.sp.web.lists.getByTitle("Schedule").items.get().then((items: any[]) => {
+    console.log('>>',items);
    let _opt=items.map(person => ({ key: person.ID, text: person.Title }));
    Array.prototype.push.apply(_options,_opt); 
     console.log('_options',_options)
@@ -109,10 +138,10 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
     
 
     
-    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days").expand("Frequency").get().then((itemss: any[]) => {
+    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title").expand("Frequency","Area").get().then((itemss: any[]) => {
       console.log("look",itemss);
 
-      itemss = itemss.map(person => ({ key: person.ID, name: person.Title, frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}));
+      itemss = itemss.map(person => ({ key: person.ID, name: person.Title,area:person.Area.Title,responsibility:person.Responsibilty ,frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate())),download:<div style={{cursor: "pointer", fontSize: "18px"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
       //console.log(">>>>>>>>>>>>>>>>>",itemss[0].datem,itemss[0].today,(itemss[0].datem-itemss[0].today));
       _items=itemss;
       this.setState({
@@ -176,7 +205,7 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
                             </MarqueeSelection>
                         </div>
     }
-    else{
+    else if (this.state.userlist.role=='user'){
         partials = <div>
                       <div className="row" style={{ paddingTop: "16px"}}>
                         <div className="col-md-6">
@@ -221,7 +250,16 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
   );
   }
   
+  private downloadattach(key): void {
+    let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(key);
+    console.log('keyy',key,item);
+      item.attachmentFiles.get().then(v => {
 
+          console.log(window.location.origin,v[0].ServerRelativeUrl);
+          //window.location.href=window.location.origin+v[0].ServerRelativeUrl;
+          window.open(window.location.origin+v[0].ServerRelativeUrl,'_blank');
+      });
+  }
   @autobind
   private _dropDownSelected(option: IDropdownOption) {
     optionkey=option.key;
