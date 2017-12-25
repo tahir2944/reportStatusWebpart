@@ -16,7 +16,7 @@
       "es6-promise",
       "webpack-env",
       "react-bootstrap"
-      
+         
     ],
     "lib": [
       "es5",

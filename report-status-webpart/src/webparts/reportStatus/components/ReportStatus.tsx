@@ -21,7 +21,8 @@ import { FileInput, SVGIcon } from 'react-md';
 import { FocusZone } from 'office-ui-fabric-react/lib/FocusZone';
 import { List } from 'office-ui-fabric-react/lib/List';
 import { SPComponentLoader } from '@microsoft/sp-loader';
-import {Button} from 'react-bootstrap';
+import {Button,Modal} from 'react-bootstrap';
+
 
 
 let _items:any[]=[];
@@ -90,6 +91,7 @@ let partials;
 
 
 
+
 export default class ReportStatus extends React.Component<IReportStatusProps, any> {
 
   private _selection: Selection;
@@ -129,7 +131,10 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
       items: _items,
       selectionDetails: this._getSelectionDetails(),
       isDisabled:true,
-      userlist:''
+      userlist:'',
+      instance:'',
+      loader:''
+      
     };
   }
 
@@ -196,6 +201,8 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
                       <div  style={{ textAlign: "center", paddingTop: "12px"}}>
                           <button type="button" id="uploadrepo" disabled={this.state.isDisabled} className="btn btn-danger" onClick={() => this.uploadattach(optionkey)}><i className="fa fa-upload"></i> &nbsp;Upload Report</button>
                       </div>
+                      
+                      
                   </div>
     }
     
@@ -205,6 +212,8 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
             <h4>User Report Screen</h4>
           </div>
             {partials}
+            {this.state.instance}
+            {this.state.loader}
           
 
          
@@ -220,6 +229,7 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
   
   private handleFileUpload({ files })
 { 
+  
     this.setState({ isDisabled: false });
   file = files[0];
   myblob = new Blob([file], {
@@ -231,10 +241,28 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
 private uploadattach(optionkey): void {
   
   if(!optionkey)
-    alert("Please select a Report Name");
+    {//alert("Please select a Report Name");
+    this.setState({ instance:  <div className="static-modal">
+                                  <Modal.Dialog>
+                                    <Modal.Header>
+                                      <Modal.Title>Error Occured</Modal.Title>
+                                    </Modal.Header>
+
+                                    <Modal.Body>
+                                      Please select a Report Name from the Dropdown Menu
+                                    </Modal.Body>
+
+                                    <Modal.Footer>
+                                      <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                    </Modal.Footer>
+
+                                  </Modal.Dialog>
+                                </div> });
+            
+  }
   
   else
-     { 
+     { this.setState({loader:<div style={{position:"fixed",left: "0",top: "0",zindex: "2000" ,width: "100%",height: "100%",overflow: "visible",background: "#333 url('http://files.mimoymima.com/images/loading.gif') no-repeat center center"}}></div>})
     
       let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(optionkey);
       console.log('itemmmm',item.attachmentFiles.get());
@@ -247,11 +275,42 @@ private uploadattach(optionkey): void {
                if(file){
                   item.attachmentFiles.add(file.name, myblob).then(vee => {
                   console.log(vee);
-                  alert("Report Uploaded Successfully");
+                 
+                  this.setState({ instance:  <div className="static-modal">
+                                              <Modal.Dialog>
+                                                <Modal.Header>
+                                                  <Modal.Title>Success!!</Modal.Title>
+                                                </Modal.Header>
+
+                                                <Modal.Body>
+                                                  File uploaded Successfully
+                                                </Modal.Body>
+
+                                                <Modal.Footer>
+                                                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                                </Modal.Footer>
+
+                                              </Modal.Dialog>
+                                            </div> });
                });
                }
                else
-                  alert("Please select a File");
+                 {this.setState({ instance:  <div className="static-modal">
+                 <Modal.Dialog>
+                   <Modal.Header>
+                     <Modal.Title>Error Occured</Modal.Title>
+                   </Modal.Header>
+
+                   <Modal.Body>
+                     Please select a File
+                   </Modal.Body>
+
+                   <Modal.Footer>
+                     <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                   </Modal.Footer>
+
+                 </Modal.Dialog>
+               </div> });}
               
         });
        
@@ -260,14 +319,63 @@ private uploadattach(optionkey): void {
             if(file){
               item.attachmentFiles.add(file.name, myblob).then(v => {
               console.log(v);
-              alert("Report Uploaded Successfully");
+              this.setState({ instance:  <div className="static-modal">
+              <Modal.Dialog>
+                <Modal.Header>
+                  <Modal.Title>Success!!</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                 Report uploaded Successfully
+                </Modal.Body>
+
+                <Modal.Footer>
+                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                </Modal.Footer>
+
+              </Modal.Dialog>
+            </div> });
            });
            }
            else
-              alert("Please select a File");
+            {
+              this.setState({ instance:  <div className="static-modal">
+                                  <Modal.Dialog>
+                                    <Modal.Header>
+                                      <Modal.Title>Error Occured</Modal.Title>
+                                    </Modal.Header>
+
+                                    <Modal.Body>
+                                      Please select a File
+                                    </Modal.Body>
+
+                                    <Modal.Footer>
+                                      <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                    </Modal.Footer>
+
+                                  </Modal.Dialog>
+                                </div> });
+            }
           }
           else
-            alert("Error occured please try again later");
+             {
+              this.setState({ instance:  <div className="static-modal">
+              <Modal.Dialog>
+                <Modal.Header>
+                  <Modal.Title>Error Occured</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                  Please try again later
+                </Modal.Body>
+
+                <Modal.Footer>
+                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                </Modal.Footer>
+
+              </Modal.Dialog>
+            </div> });
+             }
         
       });
     
@@ -298,7 +406,7 @@ private uploadattach(optionkey): void {
   }
 
   private _onItemInvoked(item: any): void {
-    alert(`Item invoked: ${item.name}`);
+    //alert(`Item invoked: ${item.name}`);
   }
 
 

@@ -13,7 +13,7 @@ import ReportStatus from './components/ReportStatus';
 import { IReportStatusProps } from './components/IReportStatusProps';
 import { SPComponentLoader } from '@microsoft/sp-loader';
 import * as reactbootstrap from 'react-bootstrap';
-
+import {} from '@types/material-ui'
 export interface IReportStatusWebPartProps {
   description: string;
   
