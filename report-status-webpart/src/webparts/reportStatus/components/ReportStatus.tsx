@@ -24,7 +24,6 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 import {Button,Modal} from 'react-bootstrap';
 
 
-
 let _items:any[]=[];
 
 
@@ -48,18 +47,9 @@ let _columns: IColumn[] = [
     isResizable: true,
     ariaLabel: 'Operations for area'
   },
-  {
-    key: 'column3',
-    name: 'Responsibility',
-    fieldName: 'responsibility',
-    minWidth: 100,
-    maxWidth: 200,
-    isResizable: true,
-    ariaLabel: 'Operations for responsibility'
-  },
 
   {
-    key: 'column4',
+    key: 'column3',
     name: 'Frequency',
     fieldName: 'frequency',
     minWidth: 100,
@@ -68,7 +58,7 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for frequency'
   },
   {
-    key: 'column5',
+    key: 'column4',
     name: 'LastUpdated',
     fieldName: 'value',
     minWidth: 100,
@@ -77,7 +67,7 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for value'
   },
   {
-    key: 'column6',
+    key: 'column5',
     name: 'Status',
     fieldName: 'status',
     minWidth: 100,
@@ -86,7 +76,7 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for status'
   },
   {
-    key: 'column7',
+    key: 'column6',
     name: 'Download',
     fieldName: 'download',
     minWidth: 100,
@@ -141,8 +131,7 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
     pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title").expand("Frequency","Area").get().then((itemss: any[]) => {
       console.log("look",itemss);
 
-      itemss = itemss.map(person => ({ key: person.ID, name: person.Title,area:person.Area.Title,responsibility:person.Responsibilty ,frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate())),download:<div style={{cursor: "pointer", fontSize: "18px"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
-      //console.log(">>>>>>>>>>>>>>>>>",itemss[0].datem,itemss[0].today,(itemss[0].datem-itemss[0].today));
+      itemss = itemss.map(person => ({ key: person.ID, name: person.Title,area:person.Area.Title,frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:<div id="statusid" style={{background: "#3b923b",color:"white", padding: "9px 93px 19px 93px"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
       _items=itemss;
       this.setState({
         items: _items
@@ -165,22 +154,33 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
       loader:''
       
     };
+    //(document.querySelectorAll('[aria-colindex="5"]') as HTMLImageElement).textContent;
+   
   }
 
   
   
   public render(): React.ReactElement<IReportStatusProps> {
-    //let { items, selectionDetails } = this.state;
+//////////+++++++++++++++++++++++++/////////////
+pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{
+  result=result.filter(res => res.Email.toLowerCase()  == this.props.usermail.toLowerCase())[0];
+  
+  }).catch(function(err) {
+  
+});
+///////////++++++++++++++++++++++++++//////////
 
-    
+
+
     let items = this.state.items;
     let selectionDetails = this.state.selectionDetails;
+////////////-------------------------------/////////
     pnp.sp.web.lists.getByTitle("UserInfo").items.get().then((itemsl: any[]) => {
       itemsl = itemsl.map(user => ({ key: user.ID, name: user.Title ,email:user.Email,role:user.role}));
       itemsl = itemsl.filter(i => i.email.toLowerCase() == this.props.usermail.toLowerCase())[0];
       this.setState({ userlist: itemsl });
     });
-   
+ //////////------------------------------------/////////  
     if(this.state.userlist.role=='manager'){
         var partials = <div>
                           <TextField
@@ -252,12 +252,27 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
   
   private downloadattach(key): void {
     let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(key);
-    console.log('keyy',key,item);
       item.attachmentFiles.get().then(v => {
-
-          console.log(window.location.origin,v[0].ServerRelativeUrl);
-          //window.location.href=window.location.origin+v[0].ServerRelativeUrl;
+        if(v.length)
           window.open(window.location.origin+v[0].ServerRelativeUrl,'_blank');
+        else{
+          this.setState({ instance:  <div className="static-modal">
+                                              <Modal.Dialog>
+                                                <Modal.Header>
+                                                  <Modal.Title>Error!!</Modal.Title>
+                                                </Modal.Header>
+
+                                                <Modal.Body>
+                                                  File does not exist.
+                                                </Modal.Body>
+
+                                                <Modal.Footer>
+                                                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                                </Modal.Footer>
+
+                                              </Modal.Dialog>
+                                            </div> });
+        }
       });
   }
   @autobind
@@ -467,3 +482,5 @@ private uploadattach(optionkey): void {
 //   }
   
 //   }
+
+
