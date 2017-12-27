@@ -23,7 +23,6 @@ import { List } from 'office-ui-fabric-react/lib/List';
 import { SPComponentLoader } from '@microsoft/sp-loader';
 import {Button,Modal} from 'react-bootstrap';
 
-
 let _items:any[]=[];
 
 
@@ -34,7 +33,7 @@ let _columns: IColumn[] = [
     name: 'Report Name',
     fieldName: 'name',
     minWidth: 100,
-    maxWidth: 200,
+    maxWidth: 100,
     isResizable: true,
     ariaLabel: 'Operations for name'
   },
@@ -42,8 +41,8 @@ let _columns: IColumn[] = [
     key: 'column2',
     name: 'Area',
     fieldName: 'area',
-    minWidth: 100,
-    maxWidth: 200,
+    minWidth: 80,
+    maxWidth: 80,
     isResizable: true,
     ariaLabel: 'Operations for area'
   },
@@ -52,8 +51,8 @@ let _columns: IColumn[] = [
     key: 'column3',
     name: 'Frequency',
     fieldName: 'frequency',
-    minWidth: 100,
-    maxWidth: 200,
+    minWidth: 80,
+    maxWidth: 80,
     isResizable: true,
     ariaLabel: 'Operations for frequency'
   },
@@ -61,8 +60,8 @@ let _columns: IColumn[] = [
     key: 'column4',
     name: 'LastUpdated',
     fieldName: 'value',
-    minWidth: 100,
-    maxWidth: 200,
+    minWidth: 80,
+    maxWidth: 80,
     isResizable: true,
     ariaLabel: 'Operations for value'
   },
@@ -70,8 +69,8 @@ let _columns: IColumn[] = [
     key: 'column5',
     name: 'Status',
     fieldName: 'status',
-    minWidth: 100,
-    maxWidth: 200,
+    minWidth: 80,
+    maxWidth: 80,
     isResizable: true,
     ariaLabel: 'Operations for status'
   },
@@ -79,8 +78,8 @@ let _columns: IColumn[] = [
     key: 'column6',
     name: 'Download',
     fieldName: 'download',
-    minWidth: 100,
-    maxWidth: 200,
+    minWidth: 80,
+    maxWidth: 80,
     isResizable: true,
     ariaLabel: 'Operations for download'
   }
@@ -104,7 +103,6 @@ let optionkey;
 let itemss;
 let today;
 let datem;
-
 let partials;
 
 
@@ -115,8 +113,8 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
 
   private _selection: Selection;
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css');
     SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css');
@@ -126,18 +124,25 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
       });
     });
     
-
+pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{ 
+  result= result.map(mail => mail.Email);
+  console.log(result.indexOf(this.props.usermail),'manager');
+  (result.indexOf(this.props.usermail)>-1) ? this.setState({userlist:'manager'}) : this.setState({userlist:''});
+  });
+pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
+  result= result.map(mail => mail.Email);
+  console.log(result.indexOf(this.props.usermail),'user');
+  (result.indexOf(this.props.usermail)>-1) ? this.setState({userlist:'user'}) :this.setState({userlist:''});
+  });
     
-    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title").expand("Frequency","Area").get().then((itemss: any[]) => {
-      console.log("look",itemss);
 
-      itemss = itemss.map(person => ({ key: person.ID, name: person.Title,area:person.Area.Title,frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:<div id="statusid" style={{background: "#3b923b",color:"white", padding: "9px 93px 19px 93px"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
+    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title").expand("Frequency","Area").get().then((itemss: any[]) => {
+       itemss = itemss.map(person => ({ key: person.ID, name: person.Title,area:person.Area.Title,frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
       _items=itemss;
       this.setState({
         items: _items
       });
-      console.log(_items,'listitemss',itemss);
-      
+           
   });    
     
 
@@ -151,46 +156,32 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
       isDisabled:true,
       userlist:'',
       instance:'',
-      loader:''
+      loader:'',
+      flag:''
       
     };
     //(document.querySelectorAll('[aria-colindex="5"]') as HTMLImageElement).textContent;
    
   }
-
-  
   
   public render(): React.ReactElement<IReportStatusProps> {
-//////////+++++++++++++++++++++++++/////////////
-pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{
-  result=result.filter(res => res.Email.toLowerCase()  == this.props.usermail.toLowerCase())[0];
-  
-  }).catch(function(err) {
-  
-});
-///////////++++++++++++++++++++++++++//////////
-
 
 
     let items = this.state.items;
     let selectionDetails = this.state.selectionDetails;
-////////////-------------------------------/////////
-    pnp.sp.web.lists.getByTitle("UserInfo").items.get().then((itemsl: any[]) => {
-      itemsl = itemsl.map(user => ({ key: user.ID, name: user.Title ,email:user.Email,role:user.role}));
-      itemsl = itemsl.filter(i => i.email.toLowerCase() == this.props.usermail.toLowerCase())[0];
-      this.setState({ userlist: itemsl });
-    });
- //////////------------------------------------/////////  
-    if(this.state.userlist.role=='manager'){
+
+    if(this.state.userlist=='manager'){
         var partials = <div>
-                          <TextField
-                            label='Filter by name:'
-                            onChanged={ this._onChanged }
-                          />
+                          <div><TextField
+                              label='Filter by name:'
+                              onChanged={ this._onChanged }
+                               /></div>
+                        
                             
                             <MarqueeSelection selection={ this._selection }>
-                            <div>
+                            <div style={{paddingTop:"13px"}}>
                             <DetailsList 
+                              
                               items={ items }
                               columns={ _columns }
                               setKey='set'
@@ -205,10 +196,10 @@ pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{
                             </MarqueeSelection>
                         </div>
     }
-    else if (this.state.userlist.role=='user'){
-        partials = <div>
-                      <div className="row" style={{ paddingTop: "16px"}}>
-                        <div className="col-md-6">
+    else if(this.state.userlist=='user'){
+        partials = <div >
+                      <div className="" style={{ paddingTop: "16px"}}>
+                        <div className="">
                       <Dropdown
                           className='Dropdown-example'
                           placeHolder='Select a Report Name'
@@ -221,13 +212,13 @@ pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{
                         
                         />
                         </div>
-                        <div className="col-md-6">
-                            <div>
+                        <div className="">
+                            <div style={{paddingTop:"15px"}}>
                               <input type="file" onChange={(e) => this.handleFileUpload(e.target)}  />
                             </div>
                         </div>    
                       </div>
-                      <div  style={{ textAlign: "center", paddingTop: "12px"}}>
+                      <div  style={{ textAlign: "center", paddingTop: "12px",marginTop: "22px"}}>
                           <button type="button" id="uploadrepo" disabled={this.state.isDisabled} className="btn btn-danger" onClick={() => this.uploadattach(optionkey)}><i className="fa fa-upload"></i> &nbsp;Upload Report</button>
                       </div>
                       
@@ -236,9 +227,10 @@ pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{
     }
     
     return (
-      <div style={{visibility:"visible"}}>
-          <div style={{ textAlign: "center", borderBottom:"1px dotted"}}>
-            <h4>User Report Screen</h4>
+      <div style={{visibility:"visible" ,background: "#f4f4f4",padding:"10px 12px 36px 12px",boxShadow:"2px 5px #a09f9f"}}>
+          <div style={{ textAlign: "center", borderBottom:"1px dotted",paddingBottom:"15px"}}>
+         
+            <h4>{this.state.userlist=='manager' ? <div> <i className="fa fa-user" style={{fontSize: "43px",float: "left"}}> </i><span style={{fontSize:"20px"}}>Manager Screen</span></div> : <div><i className="fa fa-users" style={{fontSize: "43px",float: "left"}}> </i><span style={{fontSize:"20px"}}>User Report Screen</span></div>}</h4>
           </div>
             {partials}
             {this.state.instance}
@@ -263,7 +255,7 @@ pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{
                                                 </Modal.Header>
 
                                                 <Modal.Body>
-                                                  File does not exist.
+                                                  No Report Uploaded yet
                                                 </Modal.Body>
 
                                                 <Modal.Footer>
@@ -457,7 +449,12 @@ private uploadattach(optionkey): void {
   private _onChanged(text: any): void {
     this.setState({ items: text ? _items.filter(i => i.name.toLowerCase().indexOf(text) > -1) : _items });
   }
+  @autobind
+  private _onstatusChanged(text: any): void {
+    this.setState({ items: text ? _items.filter(i => i.status.indexOf(text) > -1) : _items });
+  }
 
+  
   private _onItemInvoked(item: any): void {
     //alert(`Item invoked: ${item.name}`);
   }
