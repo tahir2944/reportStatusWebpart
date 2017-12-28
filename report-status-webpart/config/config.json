@@ -11,8 +11,13 @@
       ]
     }
   },
-  "externals": {},
+  "externals": {
+    "react-bootstrap":"https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.31.5/react-bootstrap.js"
+   
+    
+  },
   "localizedResources": {
-    "ReportStatusWebPartStrings": "lib/webparts/reportStatus/loc/{locale}.js"
+    "ReportStatusWebPartStrings": "lib/webparts/reportStatus/loc/{locale}.js",
+    
   }
 }

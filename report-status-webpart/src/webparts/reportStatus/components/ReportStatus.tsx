@@ -4,6 +4,8 @@ import { IReportStatusProps } from './IReportStatusProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 /* tslint:enable:no-unused-variable */
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
+import { Dropdown, IDropdown, DropdownMenuItemType, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
+
 import {
   DetailsList,
   DetailsListLayoutMode,
@@ -11,67 +13,138 @@ import {
   IColumn
 } from 'office-ui-fabric-react/lib/DetailsList';
 import { MarqueeSelection } from 'office-ui-fabric-react/lib/MarqueeSelection';
-import { autobind } from 'office-ui-fabric-react/lib/Utilities';
+import { autobind,BaseComponent } from 'office-ui-fabric-react/lib/Utilities';
 import { IListItem } from "../../../common/IObjects";
+import pnp from "sp-pnp-js";
+import { PrimaryButton } from 'office-ui-fabric-react/lib/Button';
+import { FileInput, SVGIcon } from 'react-md';
+import { FocusZone } from 'office-ui-fabric-react/lib/FocusZone';
+import { List } from 'office-ui-fabric-react/lib/List';
+import { SPComponentLoader } from '@microsoft/sp-loader';
+import {Button,Modal} from 'react-bootstrap';
+
+let _items:any[]=[];
 
 
-let _items: any[] = [];
 
 let _columns: IColumn[] = [
   {
     key: 'column1',
-    name: 'ReportName',
-    fieldName: 'Title',
+    name: 'Report Name',
+    fieldName: 'name',
     minWidth: 100,
-    maxWidth: 200,
+    maxWidth: 100,
     isResizable: true,
     ariaLabel: 'Operations for name'
   },
   {
     key: 'column2',
-    name: 'Frequency',
-    fieldName: 'Frequency',
+    name: 'Area',
+    fieldName: 'area',
     minWidth: 100,
-    maxWidth: 200,
+    maxWidth: 100,
+    isResizable: true,
+    ariaLabel: 'Operations for area'
+  },
+
+  {
+    key: 'column3',
+    name: 'Frequency',
+    fieldName: 'frequency',
+    minWidth: 90,
+    maxWidth: 90,
+    isResizable: true,
+    ariaLabel: 'Operations for frequency'
+  },
+  {
+    key: 'column4',
+    name: 'LastUpdated',
+    fieldName: 'value',
+    minWidth: 90,
+    maxWidth: 90,
     isResizable: true,
     ariaLabel: 'Operations for value'
   },
   {
-    key: 'column3',
-    name: 'LastUpdated',
-    fieldName: 'LastUpdated',
-    minWidth: 100,
-    maxWidth: 200,
+    key: 'column5',
+    name: 'Status',
+    fieldName: 'status',
+    minWidth: 90,
+    maxWidth: 90,
     isResizable: true,
-    ariaLabel: 'Operations for value'
+    ariaLabel: 'Operations for status'
   },
+  {
+    key: 'column6',
+    name: 'Download',
+    fieldName: 'download',
+    minWidth: 70,
+    maxWidth: 70,
+    isResizable: true,
+    ariaLabel: 'Operations for download'
+  }
+  
 ];
 
+let myblob;
+let file;
+let _options =
+  [
+    { key: 'Header', text: 'Report Names', itemType: DropdownMenuItemType.Header },
+  ];
+
+  pnp.sp.web.lists.getByTitle("Schedule").items.get().then((items: any[]) => {
+    console.log('>>',items);
+   let _opt=items.map(person => ({ key: person.ID, text: person.Title }));
+   Array.prototype.push.apply(_options,_opt); 
+    console.log('_options',_options)
+});
+let optionkey;
+let itemss;
+let today;
+let datem;
+let partials;
 
 
 
 
 
-
-
-
-export default class ReportStatus extends React.Component<any, any> {
+export default class ReportStatus extends React.Component<IReportStatusProps, any> {
 
   private _selection: Selection;
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
-    // Populate with items for demos.
-    if (_items.length === 0) {
-      for (let i = 0; i < 200; i++) {
-        _items.push({
-          key: i,
-          name: 'Item ' + i,
-          value: i
-        });
-      }
-    }
+    SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css');
+    SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css');
+
+    SPComponentLoader.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js', { globalExportsName: 'jQuery' }).then((jQuery: any): void => {
+      SPComponentLoader.loadScript('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js',  { globalExportsName: 'jQuery' }).then((): void => {        
+      });
+    });
+    
+pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{ 
+  result= result.map(mail => mail.Email);
+  console.log(result.indexOf(this.props.usermail),'manager');
+  (result.indexOf(this.props.usermail)>-1) ? this.setState({userlist:'manager'}) : this.setState({userlist:''});
+  });
+pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
+  result= result.map(mail => mail.Email);
+  console.log(result.indexOf(this.props.usermail),'user');
+  (result.indexOf(this.props.usermail)>-1) ? this.setState({userlist:'user'}) :this.setState({userlist:''});
+  });
+    
+
+    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title").expand("Frequency","Area").get().then((itemss: any[]) => {
+       itemss = itemss.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title,frequency:person.Frequency.Title , value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
+      _items=itemss;
+      this.setState({
+        items: _items
+      });
+           
+  });    
+    
 
     this._selection = new Selection({
       onSelectionChanged: () => this.setState({ selectionDetails: this._getSelectionDetails() })
@@ -79,50 +152,286 @@ export default class ReportStatus extends React.Component<any, any> {
 
     this.state = {
       items: _items,
-      selectionDetails: this._getSelectionDetails()
+      selectionDetails: this._getSelectionDetails(),
+      isDisabled:true,
+      userlist:'',
+      instance:'',
+      loader:'',
+      flag:''
+      
     };
-  }
-
-  public componentDidMount() {
-    //this.props.dataProvider.readListItems(this);
-    this.props.dataProvider.readDocumentsFromSearch().then(
-      (_items: IListItem[]) => {
-        //debugger;
-        this.setState({
-          items: _items
-        });
-       }
-      )
+    //(document.querySelectorAll('[aria-colindex="5"]') as HTMLImageElement).textContent;
+   
   }
   
   public render(): React.ReactElement<IReportStatusProps> {
-    let { items, selectionDetails } = this.state;
+
+
+    let items = this.state.items;
+    let selectionDetails = this.state.selectionDetails;
+
+    if(this.state.userlist=='manager'){
+        var partials = <div>
+                          <div><TextField
+                              label='Filter by name:'
+                              onChanged={ this._onChanged }
+                               /></div>
+                        
+                            
+                            <MarqueeSelection selection={ this._selection }>
+                            <div style={{paddingTop:"13px"}}>
+                            <DetailsList 
+                              
+                              items={ items }
+                              columns={ _columns }
+                              setKey='set'
+                              layoutMode={ DetailsListLayoutMode.fixedColumns }
+                              selection={ this._selection }
+                              selectionPreservedOnEmptyClick={ true }
+                              ariaLabelForSelectionColumn='Toggle selection'
+                              ariaLabelForSelectAllCheckbox='Toggle selection for all items'
+                              onItemInvoked={ this._onItemInvoked }
+                              // onRenderItemColumn={ _renderItemColumn }
+                            /></div>
+                            </MarqueeSelection>
+                        </div>
+    }
+    else if(this.state.userlist=='user'){
+        partials = <div >
+                      <div className="" style={{ paddingTop: "16px"}}>
+                        <div className="">
+                      <Dropdown
+                          className='Dropdown-example'
+                          placeHolder='Select a Report Name'
+                          label=''
+                          id='Basicdrop1'
+                          ariaLabel='Basic dropdown example'
+                          options={_options}
+                          onChanged={ this._dropDownSelected }
+                          onBlur={ this._log('onBlur called') }
+                        
+                        />
+                        </div>
+                        <div className="">
+                            <div style={{paddingTop:"15px"}}>
+                              <input type="file" onChange={(e) => this.handleFileUpload(e.target)}  />
+                            </div>
+                        </div>    
+                      </div>
+                      <div  style={{ textAlign: "center", paddingTop: "12px",marginTop: "22px"}}>
+                          <button type="button" id="uploadrepo" disabled={this.state.isDisabled} className="btn btn-danger" onClick={() => this.uploadattach(optionkey)}><i className="fa fa-upload"></i> &nbsp;Upload Report</button>
+                      </div>
+                      
+                      
+                  </div>
+    }
     
     return (
-      <div>
-      <div>{ selectionDetails }</div>
-      <TextField
-        label='Filter by name:'
-        onChanged={ this._onChanged }
-      />
-        
-        <MarqueeSelection selection={ this._selection }>
-        <DetailsList
-          items={ items }
-          columns={ _columns }
-          setKey='set'
-          layoutMode={ DetailsListLayoutMode.fixedColumns }
-          selection={ this._selection }
-          selectionPreservedOnEmptyClick={ true }
-          ariaLabelForSelectionColumn='Toggle selection'
-          ariaLabelForSelectAllCheckbox='Toggle selection for all items'
-          onItemInvoked={ this._onItemInvoked }
-        />
-                </MarqueeSelection>
+      <div style={{visibility:"visible" ,background: "#f4f4f4",padding:"10px 12px 36px 12px",boxShadow:"2px 5px #a09f9f"}}>
+          <div style={{ textAlign: "center", borderBottom:"1px dotted",paddingBottom:"15px"}}>
+         
+            <h4>{this.state.userlist=='manager' ? <div> <i className="fa fa-user" style={{fontSize: "43px",float: "left"}}> </i><span style={{fontSize:"20px"}}>Manager Screen</span></div> : <div><i className="fa fa-users" style={{fontSize: "43px",float: "left"}}> </i><span style={{fontSize:"20px"}}>User Report Screen</span></div>}</h4>
+          </div>
+            {partials}
+            {this.state.instance}
+            {this.state.loader}
+          
+
+         
     </div>
   );
   }
+  
+  private downloadattach(key): void {
+    let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(key);
+      item.attachmentFiles.get().then(v => {
+        if(v.length)
+          window.open(window.location.origin+v[0].ServerRelativeUrl,'_blank');
+        else{
+          this.setState({ instance:  <div className="static-modal">
+                                              <Modal.Dialog>
+                                                <Modal.Header>
+                                                  <Modal.Title>Error!!</Modal.Title>
+                                                </Modal.Header>
 
+                                                <Modal.Body>
+                                                  No Report Uploaded yet
+                                                </Modal.Body>
+
+                                                <Modal.Footer>
+                                                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                                </Modal.Footer>
+
+                                              </Modal.Dialog>
+                                            </div> });
+        }
+      });
+  }
+  @autobind
+  private _dropDownSelected(option: IDropdownOption) {
+    optionkey=option.key;
+  }
+  
+  private handleFileUpload({ files })
+{ 
+  
+    this.setState({ isDisabled: false });
+  file = files[0];
+  myblob = new Blob([file], {
+    type:'application/pdf'
+});
+
+  // send file to server here the way you need
+}
+private uploadattach(optionkey): void {
+  
+  if(!optionkey)
+    {//alert("Please select a Report Name");
+    this.setState({ instance:  <div className="static-modal">
+                                  <Modal.Dialog>
+                                    <Modal.Header>
+                                      <Modal.Title>Error Occured</Modal.Title>
+                                    </Modal.Header>
+
+                                    <Modal.Body>
+                                      Please select a Report Name from the Dropdown Menu
+                                    </Modal.Body>
+
+                                    <Modal.Footer>
+                                      <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                    </Modal.Footer>
+
+                                  </Modal.Dialog>
+                                </div> });
+            
+  }
+  
+  else
+     { this.setState({loader:<div style={{position:"fixed",left: "0",top: "0",zindex: "2000" ,width: "100%",height: "100%",overflow: "visible",background: "#333 url('http://files.mimoymima.com/images/loading.gif') no-repeat center center"}}></div>})
+    
+      let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(optionkey);
+      console.log('itemmmm',item.attachmentFiles.get());
+      
+        item.attachmentFiles.get().then(v => {
+          console.log(v,'names');
+          if(v.length){
+              item.attachmentFiles.getByName(v[0].FileName).delete().then(ve => {
+               console.log(ve);
+               if(file){
+                  item.attachmentFiles.add(file.name, myblob).then(vee => {
+                  console.log(vee);
+                 
+                  this.setState({ instance:  <div className="static-modal">
+                                              <Modal.Dialog>
+                                                <Modal.Header>
+                                                  <Modal.Title>Success!!</Modal.Title>
+                                                </Modal.Header>
+
+                                                <Modal.Body>
+                                                  File uploaded Successfully
+                                                </Modal.Body>
+
+                                                <Modal.Footer>
+                                                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                                </Modal.Footer>
+
+                                              </Modal.Dialog>
+                                            </div> });
+               });
+               }
+               else
+                 {this.setState({ instance:  <div className="static-modal">
+                 <Modal.Dialog>
+                   <Modal.Header>
+                     <Modal.Title>Error Occured</Modal.Title>
+                   </Modal.Header>
+
+                   <Modal.Body>
+                     Please select a File
+                   </Modal.Body>
+
+                   <Modal.Footer>
+                     <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                   </Modal.Footer>
+
+                 </Modal.Dialog>
+               </div> });}
+              
+        });
+       
+          }
+          else if(v.length==0){
+            if(file){
+              item.attachmentFiles.add(file.name, myblob).then(v => {
+              console.log(v);
+              this.setState({ instance:  <div className="static-modal">
+              <Modal.Dialog>
+                <Modal.Header>
+                  <Modal.Title>Success!!</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                 Report uploaded Successfully
+                </Modal.Body>
+
+                <Modal.Footer>
+                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                </Modal.Footer>
+
+              </Modal.Dialog>
+            </div> });
+           });
+           }
+           else
+            {
+              this.setState({ instance:  <div className="static-modal">
+                                  <Modal.Dialog>
+                                    <Modal.Header>
+                                      <Modal.Title>Error Occured</Modal.Title>
+                                    </Modal.Header>
+
+                                    <Modal.Body>
+                                      Please select a File
+                                    </Modal.Body>
+
+                                    <Modal.Footer>
+                                      <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                    </Modal.Footer>
+
+                                  </Modal.Dialog>
+                                </div> });
+            }
+          }
+          else
+             {
+              this.setState({ instance:  <div className="static-modal">
+              <Modal.Dialog>
+                <Modal.Header>
+                  <Modal.Title>Error Occured</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                  Please try again later
+                </Modal.Body>
+
+                <Modal.Footer>
+                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                </Modal.Footer>
+
+              </Modal.Dialog>
+            </div> });
+             }
+        
+      });
+    
+    }
+
+  }
+  private _log(str: string): () => void {
+    return (): void => {
+      console.log(str);
+    };
+  }
   private _getSelectionDetails(): string {
     let selectionCount = this._selection.getSelectedCount();
 
@@ -140,10 +449,35 @@ export default class ReportStatus extends React.Component<any, any> {
   private _onChanged(text: any): void {
     this.setState({ items: text ? _items.filter(i => i.name.toLowerCase().indexOf(text) > -1) : _items });
   }
+  @autobind
+  private _onstatusChanged(text: any): void {
+    this.setState({ items: text ? _items.filter(i => i.status.indexOf(text) > -1) : _items });
+  }
 
+  
   private _onItemInvoked(item: any): void {
-    alert(`Item invoked: ${item.name}`);
+    //alert(`Item invoked: ${item.name}`);
   }
 
 
 }
+// function _renderItemColumn(item: any, index: number, column: IColumn) {
+
+//   let fieldContent = item.status>=0 ? 'green':'red';
+//   console.log('column',column,'item',item,'index',index,'fieldContent',fieldContent);
+//   if (column.key=='column4') {
+//     return <span  style={ { color: fieldContent } }>{ item.status }</span>;
+//   }
+//   if (column.key=='column3') {
+//     return <span >{ item.value }</span>;
+//   }
+//   if (column.key=='column2') {
+//     return <span >{ item.frequency }</span>;
+//   }
+//   if (column.key=='column1') {
+//     return <span >{ item.name }</span>;
+//   }
+  
+//   }
+
+
