@@ -41,8 +41,8 @@ let _columns: IColumn[] = [
     key: 'column2',
     name: 'Area',
     fieldName: 'area',
-    minWidth: 80,
-    maxWidth: 80,
+    minWidth: 100,
+    maxWidth: 100,
     isResizable: true,
     ariaLabel: 'Operations for area'
   },
@@ -51,8 +51,8 @@ let _columns: IColumn[] = [
     key: 'column3',
     name: 'Frequency',
     fieldName: 'frequency',
-    minWidth: 80,
-    maxWidth: 80,
+    minWidth: 90,
+    maxWidth: 90,
     isResizable: true,
     ariaLabel: 'Operations for frequency'
   },
@@ -60,8 +60,8 @@ let _columns: IColumn[] = [
     key: 'column4',
     name: 'LastUpdated',
     fieldName: 'value',
-    minWidth: 80,
-    maxWidth: 80,
+    minWidth: 90,
+    maxWidth: 90,
     isResizable: true,
     ariaLabel: 'Operations for value'
   },
@@ -69,8 +69,8 @@ let _columns: IColumn[] = [
     key: 'column5',
     name: 'Status',
     fieldName: 'status',
-    minWidth: 80,
-    maxWidth: 80,
+    minWidth: 90,
+    maxWidth: 90,
     isResizable: true,
     ariaLabel: 'Operations for status'
   },
@@ -78,8 +78,8 @@ let _columns: IColumn[] = [
     key: 'column6',
     name: 'Download',
     fieldName: 'download',
-    minWidth: 80,
-    maxWidth: 80,
+    minWidth: 70,
+    maxWidth: 70,
     isResizable: true,
     ariaLabel: 'Operations for download'
   }
@@ -137,7 +137,7 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
     
 
     pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title").expand("Frequency","Area").get().then((itemss: any[]) => {
-       itemss = itemss.map(person => ({ key: person.ID, name: person.Title,area:person.Area.Title,frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')),status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
+       itemss = itemss.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title,frequency:person.Frequency.Title , value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
       _items=itemss;
       this.setState({
         items: _items
