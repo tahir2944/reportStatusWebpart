@@ -7,7 +7,7 @@ import {
   PropertyPaneTextField
   
 } from '@microsoft/sp-webpart-base';
-
+/// <reference path="../reportStatus/loc/mystrings" />
 import * as strings from 'ReportStatusWebPartStrings';
 import ReportStatus from './components/ReportStatus';
 import { IReportStatusProps } from './components/IReportStatusProps';

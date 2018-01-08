@@ -41,14 +41,22 @@ let _columns: IColumn[] = [
     key: 'column2',
     name: 'Area',
     fieldName: 'area',
-    minWidth: 100,
-    maxWidth: 100,
+    minWidth: 90,
+    maxWidth: 90,
     isResizable: true,
     ariaLabel: 'Operations for area'
   },
-
   {
     key: 'column3',
+    name: 'Division',
+    fieldName: 'division',
+    minWidth: 90,
+    maxWidth: 90,
+    isResizable: true,
+    ariaLabel: 'Operations for division'
+  },
+  {
+    key: 'column4',
     name: 'Frequency',
     fieldName: 'frequency',
     minWidth: 90,
@@ -57,7 +65,7 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for frequency'
   },
   {
-    key: 'column4',
+    key: 'column5',
     name: 'LastUpdated',
     fieldName: 'value',
     minWidth: 90,
@@ -66,7 +74,7 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for value'
   },
   {
-    key: 'column5',
+    key: 'column6',
     name: 'Status',
     fieldName: 'status',
     minWidth: 90,
@@ -75,11 +83,11 @@ let _columns: IColumn[] = [
     ariaLabel: 'Operations for status'
   },
   {
-    key: 'column6',
-    name: 'Download',
+    key: 'column7',
+    name: 'Download/Viewer',
     fieldName: 'download',
-    minWidth: 70,
-    maxWidth: 70,
+    minWidth: 90,
+    maxWidth: 90,
     isResizable: true,
     ariaLabel: 'Operations for download'
   }
@@ -104,7 +112,8 @@ let itemss;
 let today;
 let datem;
 let partials;
-
+let filterarea;
+let filterdiv;
 
 
 
@@ -136,8 +145,8 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
   });
     
 
-    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title").expand("Frequency","Area").get().then((itemss: any[]) => {
-       itemss = itemss.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title,frequency:person.Frequency.Title , value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i></div>}));
+    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title","Division/Title").expand("Frequency","Area","Division").get().then((itemss: any[]) => {
+       itemss = itemss.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title,division:person.Division.Title,frequency:person.Frequency.Title , value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i><i style={{paddingLeft:"12px",marginLeft:"8px"}} className="fa fa-eye" onClick={() => this.viewattach(person.ID)}></i></div>}));
       _items=itemss;
       this.setState({
         items: _items
@@ -172,12 +181,21 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
 
     if(this.state.userlist=='manager'){
         var partials = <div>
-                          <div><TextField
-                              label='Filter by name:'
+                          <div style={{paddingTop:"15px"}} className='row'>
+                            <div className='col-md-4'><TextField
+                              id='areaid'
+                              placeholder='Filter by area'
+                               onChanged={ this._onChanged }
+                               /></div>
+                               <div  className='col-md-4'><TextField
+                               placeholder='Filter by division'
+                              id='divid'
                               onChanged={ this._onChanged }
                                /></div>
-                        
-                            
+                              <div  className='col-md-4'> <button type="button" style={{width:"45%",boxShadow:"rgba(10, 10, 10, 0.19) 0px 8px 15px"}} className="btn btn-primary" onClick={() => this._onstatusChanged('heyeyye')}>Filter</button></div>
+                          </div>
+                
+
                             <MarqueeSelection selection={ this._selection }>
                             <div style={{paddingTop:"13px"}}>
                             <DetailsList 
@@ -191,7 +209,7 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
                               ariaLabelForSelectionColumn='Toggle selection'
                               ariaLabelForSelectAllCheckbox='Toggle selection for all items'
                               onItemInvoked={ this._onItemInvoked }
-                              // onRenderItemColumn={ _renderItemColumn }
+                             
                             /></div>
                             </MarqueeSelection>
                         </div>
@@ -214,7 +232,7 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
                         </div>
                         <div className="">
                             <div style={{paddingTop:"15px"}}>
-                              <input type="file" onChange={(e) => this.handleFileUpload(e.target)}  />
+                              <input type="file" style={{backgroundColor: "initial"}} onChange={(e) => this.handleFileUpload(e.target)}  />
                             </div>
                         </div>    
                       </div>
@@ -241,7 +259,33 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
     </div>
   );
   }
-  
+  private viewattach(key): void {
+    let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(key);
+    item.attachmentFiles.get().then(v => {
+      if(v.length)
+        window.open('https://havells.sharepoint.com'+v[0].ServerRelativePath.DecodedUrl+'?web=1');
+      else{
+          this.setState({ instance:  <div className="static-modal">
+                                              <Modal.Dialog>
+                                                <Modal.Header>
+                                                  <Modal.Title>Error!!</Modal.Title>
+                                                </Modal.Header>
+
+                                                <Modal.Body>
+                                                  No Report Uploaded yet
+                                                </Modal.Body>
+
+                                                <Modal.Footer>
+                                                  <Button bsStyle="danger" onClick={() => this.setState({instance:'',loader:''})}>OK</Button>
+                                                </Modal.Footer>
+
+                                              </Modal.Dialog>
+                                            </div> });
+        }
+      
+    })
+
+  }
   private downloadattach(key): void {
     let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(key);
       item.attachmentFiles.get().then(v => {
@@ -446,12 +490,15 @@ private uploadattach(optionkey): void {
   }
 
   @autobind
-  private _onChanged(text: any): void {
-    this.setState({ items: text ? _items.filter(i => i.name.toLowerCase().indexOf(text) > -1) : _items });
+  private _onChanged(text:any): void {
+      this.setState({ items: _items });
   }
   @autobind
   private _onstatusChanged(text: any): void {
-    this.setState({ items: text ? _items.filter(i => i.status.indexOf(text) > -1) : _items });
+    let areaval = (document.getElementById('areaid') as HTMLInputElement).value;
+    let divval = (document.getElementById('divid') as HTMLInputElement).value;
+    //console.log(this.state.items.filter(i => i.division.toLowerCase().indexOf(divval) > -1 && i.area.toLowerCase().indexOf(areaval) > -1 ));
+    this.setState({ items: this.state.items.filter(i => i.division.toLowerCase().indexOf(divval) > -1 && i.area.toLowerCase().indexOf(areaval) > -1 ) });
   }
 
   
@@ -461,23 +508,5 @@ private uploadattach(optionkey): void {
 
 
 }
-// function _renderItemColumn(item: any, index: number, column: IColumn) {
-
-//   let fieldContent = item.status>=0 ? 'green':'red';
-//   console.log('column',column,'item',item,'index',index,'fieldContent',fieldContent);
-//   if (column.key=='column4') {
-//     return <span  style={ { color: fieldContent } }>{ item.status }</span>;
-//   }
-//   if (column.key=='column3') {
-//     return <span >{ item.value }</span>;
-//   }
-//   if (column.key=='column2') {
-//     return <span >{ item.frequency }</span>;
-//   }
-//   if (column.key=='column1') {
-//     return <span >{ item.name }</span>;
-//   }
-  
-//   }
 
 
