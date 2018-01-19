@@ -3,7 +3,7 @@
   "solution": {
     "name": "report-status-webpart-client-side-solution",
     "id": "557ab813-dc1c-49a3-9f09-637c9436e0fd",
-    "version": "1.0.0.0",
+    "version": "1.0.0.1",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true
   },

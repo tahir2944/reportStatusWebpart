@@ -102,10 +102,10 @@ let _options =
   ];
 
   pnp.sp.web.lists.getByTitle("Schedule").items.get().then((items: any[]) => {
-    console.log('>>',items);
+    //console.log('>>',items);
    let _opt=items.map(person => ({ key: person.ID, text: person.Title }));
    Array.prototype.push.apply(_options,_opt); 
-    console.log('_options',_options)
+    //console.log('_options',_options)
 });
 let optionkey;
 let itemss;
@@ -114,6 +114,10 @@ let datem;
 let partials;
 let filterarea;
 let filterdiv;
+let areatree;
+let divtree;
+let test;
+//let areatree='<div data-toggle="collapse" data-target=Neemrana style="cursor:pointer;width:max-content;background:#fff;padding:3px;margin:3px">&#62; Neemrana</div><ul id=Neemrana class="collapse"><li style="cursor:pointer">loc1</li><li style="cursor:pointer">loc2</li><li style="cursor:pointer">loc3</li></ul><div data-toggle="collapse" data-target=Baddi style="cursor:pointer;width:max-content;background:#fff;padding:3px;margin:3px">&#62; Baddi</div><ul id=Baddi class="collapse"><li style="cursor:pointer">loc1</li><li style="cursor:pointer">loc2</li><li style="cursor:pointer">loc3</li></ul><div data-toggle="collapse" data-target=HO style="cursor:pointer;width:max-content;background:#fff;padding:3px;margin:3px">&#62; HO</div><ul id=HO class="collapse"><li style="cursor:pointer">loc1</li><li style="cursor:pointer">loc2</li><li style="cursor:pointer">loc3</li></ul><div data-toggle="collapse" data-target=Haridwar style="cursor:pointer;width:max-content;background:#fff;padding:3px;margin:3px">&#62; Haridwar</div><ul id=Haridwar class="collapse"><li style="cursor:pointer">loc1</li><li style="cursor:pointer">loc2</li><li style="cursor:pointer">loc3</li></ul><div data-toggle="collapse" data-target=Faridabad style="cursor:pointer;width:max-content;background:#fff;padding:3px;margin:3px">&#62; Faridabad</div><ul id=Faridabad class="collapse"><li style="cursor:pointer">loc1</li><li style="cursor:pointer">loc2</li><li style="cursor:pointer">loc3</li></ul><div data-toggle="collapse" data-target=Alwar style="cursor:pointer;width:max-content;background:#fff;padding:3px;margin:3px">&#62; Alwar</div><ul id=Alwar class="collapse"><li style="cursor:pointer">loc1</li><li style="cursor:pointer">loc2</li><li style="cursor:pointer">loc3</li></ul>';
 
 
 
@@ -121,40 +125,114 @@ let filterdiv;
 export default class ReportStatus extends React.Component<IReportStatusProps, any> {
 
   private _selection: Selection;
+ 
 
   constructor(props) {
     super(props);
 
     SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css');
     SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css');
-
+    
     SPComponentLoader.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js', { globalExportsName: 'jQuery' }).then((jQuery: any): void => {
-      SPComponentLoader.loadScript('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js',  { globalExportsName: 'jQuery' }).then((): void => {        
+      SPComponentLoader.loadScript('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js',  { globalExportsName: 'jQuery' }).then((): void => {  
+             
       });
     });
-    
+
 pnp.sp.web.siteGroups.getByName('Managers').users.get().then((result) =>{ 
   result= result.map(mail => mail.Email);
-  console.log(result.indexOf(this.props.usermail),'manager');
+  //console.log(result.indexOf(this.props.usermail),'manager');
   (result.indexOf(this.props.usermail)>-1) ? this.setState({userlist:'manager'}) : this.setState({userlist:''});
   });
 pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
   result= result.map(mail => mail.Email);
-  console.log(result.indexOf(this.props.usermail),'user');
-  (result.indexOf(this.props.usermail)>-1) ? this.setState({userlist:'user'}) :this.setState({userlist:''});
+  //console.log(result.indexOf(this.props.usermail),'user');
+  (result.indexOf(this.props.usermail)>-1) ?(this.setState({userlist:'user'})) :this.setState({userlist:''});
   });
-    
+  pnp.sp.web.siteGroups.getByName('Schedulers').users.get().then((result) =>{ 
+    result= result.map(mail => mail.Email);
+    //console.log(result.indexOf(this.props.usermail),'Schedulers');
+    (result.indexOf(this.props.usermail)>-1) ? this.setState({userlist:'Schedulers'}) : this.setState({userlist:''});
+    });
+
 
     pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title","Division/Title").expand("Frequency","Area","Division").get().then((itemss: any[]) => {
-       itemss = itemss.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title,division:person.Division.Title,frequency:person.Frequency.Title , value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i><i style={{paddingLeft:"12px",marginLeft:"8px"}} className="fa fa-eye" onClick={() => this.viewattach(person.ID)}></i></div>}));
+       itemss = itemss.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title, division:person.Division.Title, frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i><i style={{paddingLeft:"12px",marginLeft:"8px"}} className="fa fa-eye" onClick={() => this.viewattach(person.ID)}></i></div>}));
       _items=itemss;
       this.setState({
         items: _items
       });
            
   });    
-    
+     
+  pnp.sp.web.siteUsers.get().then((user: any[]) => {
+    //console.log('usssseeer',user)
+    pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","AssignedToId","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title","Division/Title").expand("Frequency","Area","Division").get().then((item: any[]) => {
+      console.log(item,'itemuser',user)
+    })
 
+    })
+   
+      pnp.sp.profiles.myProperties.get()
+      .then(userprops => {
+        pnp.sp.site.rootWeb.ensureUser(userprops.Email).then(result => {
+          //console.log(result.data.Id,'result');
+          pnp.sp.web.lists.getByTitle("Schedule").items.select("Title","AssignedToId","Modified" ,"ID","Frequency/Title", "Frequency/ID","Frequency/No_x002e__x0020_of_x0020_days","Area/Title","Division/Title").expand("Frequency","Area","Division").get().then((item: any[]) => {
+           item = item.filter(detail => {
+               if (detail.AssignedToId == result.data.Id){
+                  detail.responsibility=result.data.Title
+                  return detail;
+                 // detail.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title, division:person.Division.Title, frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i><i style={{paddingLeft:"12px",marginLeft:"8px"}} className="fa fa-eye" onClick={() => this.viewattach(person.ID)}></i></div>}));
+                 
+                  // this.setState({
+                  //   items: detail
+                  // });
+                    } })
+            item=item.map(person => ({ key: person.ID, name:person.Title,area:person.Area.Title, division:person.Division.Title, frequency:person.Frequency.Title, value:person.Modified.substring(0, person.Modified.indexOf('T')) ,status:<div id="statusid" style={(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))>=0 ? {background: "#3b923b",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}:{background: "rgb(197, 51, 51)",color:"white", padding: "4px 1px 7px",textAlign: "center",width: "68%"}}>{(1+person.Frequency.No_x002e__x0020_of_x0020_days-(new Date(new Date().getTime() - new Date(person.Modified).getTime()).getDate()))}</div>,download:<div style={{cursor: "pointer", fontSize: "18px",textAlign:"center"}}><i className="fa fa-download" onClick={() => this.downloadattach(person.ID)}></i><i style={{paddingLeft:"12px",marginLeft:"8px"}} className="fa fa-eye" onClick={() => this.viewattach(person.ID)}></i></div>}))
+            if(this.state.userlist=='user'){
+              console.log(item,'itemitem');
+              this.setState({
+                    itemsuser: item
+                  });
+            }
+          }); 
+        }) 
+    });
+    
+  
+
+  pnp.sp.web.lists.getByTitle("Division").items.select("Title","ID").get().then((item: any[]) => {
+    //console.log('item.map(',item.map(per =>console.log(per.Title)));
+    divtree=item.map(per =>'<li class="divis" id="'+per.Title+'" style="cursor:pointer;width:25%;background:#ccc8c8;padding:3px;margin:3px" onclick="elementt(event.path)" >'+per.Title+'</li>');
+    divtree.toString().replace(/,/g , "");
+    
+    pnp.sp.web.lists.getByTitle("Area").items.select("Title","ID").get().then((itemss: any[]) => {
+      areatree =itemss.map(person =>'<div class="area" title="'+person.Title+'" data-toggle="collapse" onclick="elementt(event.path)" data-target= "#'+person.Title+'" style="cursor:pointer;width:25%;background:#fff;padding:3px;margin:3px">&#62;  '+person.Title+'</div><ul id='+person.Title+' class="collapse">'+divtree+'</ul>')
+      areatree=areatree.toString().replace(/,/g , "");
+      //console.log('areae',areatree);
+      this.setState({
+        areatree: areatree
+      });
+      
+    });  
+  }); 
+  let eles = this; 
+  
+  (window as any).elementt=function(uiid){
+    console.log(uiid);
+    eles.setState({items:_items});
+    if(uiid[0].className=='area'){
+      console.log(uiid[0].title,'header',eles.state.items.filter(i => {  if (i.area ==uiid[0].title) return i; }));
+      eles.setState({ items: eles.state.items.filter(i => {  if (i.area ==uiid[0].title) return i; }) });
+
+    }
+    else if(uiid[0].className=='divis'){
+      console.log(uiid,'hee',uiid[0].id,uiid[1].id,eles.state.items)
+      eles.setState({ items: eles.state.items.filter(i => {  if (i.division ==uiid[0].id && i.area ==uiid[1].id) return i; }) });
+}
+    }
+
+ 
     this._selection = new Selection({
       onSelectionChanged: () => this.setState({ selectionDetails: this._getSelectionDetails() })
     });
@@ -180,22 +258,8 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
     let selectionDetails = this.state.selectionDetails;
 
     if(this.state.userlist=='manager'){
-        var partials = <div>
-                          <div style={{paddingTop:"15px"}} className='row'>
-                            <div className='col-md-4'><TextField
-                              id='areaid'
-                              placeholder='Filter by area'
-                               onChanged={ this._onChanged }
-                               /></div>
-                               <div  className='col-md-4'><TextField
-                               placeholder='Filter by division'
-                              id='divid'
-                              onChanged={ this._onChanged }
-                               /></div>
-                              <div  className='col-md-4'> <button type="button" style={{width:"45%",boxShadow:"rgba(10, 10, 10, 0.19) 0px 8px 15px"}} className="btn btn-primary" onClick={() => this._onstatusChanged('heyeyye')}>Filter</button></div>
-                          </div>
-                
-
+        var partials = <div>                
+                <div dangerouslySetInnerHTML={{__html: this.state.areatree}} ></div>
                             <MarqueeSelection selection={ this._selection }>
                             <div style={{paddingTop:"13px"}}>
                             <DetailsList 
@@ -215,6 +279,7 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
                         </div>
     }
     else if(this.state.userlist=='user'){
+      
         partials = <div >
                       <div className="" style={{ paddingTop: "16px"}}>
                         <div className="">
@@ -239,11 +304,99 @@ pnp.sp.web.siteGroups.getByName('users').users.get().then((result) =>{
                       <div  style={{ textAlign: "center", paddingTop: "12px",marginTop: "22px"}}>
                           <button type="button" id="uploadrepo" disabled={this.state.isDisabled} className="btn btn-danger" onClick={() => this.uploadattach(optionkey)}><i className="fa fa-upload"></i> &nbsp;Upload Report</button>
                       </div>
+                      <MarqueeSelection selection={ this._selection }>
+                        <div style={{paddingTop:"13px"}}>
+                        <DetailsList 
+                          
+                          items={ this.state.itemsuser }
+                          columns={ _columns }
+                          setKey='set'
+                          layoutMode={ DetailsListLayoutMode.fixedColumns }
+                          selection={ this._selection }
+                          selectionPreservedOnEmptyClick={ true }
+                          ariaLabelForSelectionColumn='Toggle selection'
+                          ariaLabelForSelectAllCheckbox='Toggle selection for all items'
+                          onItemInvoked={ this._onItemInvoked }
+                        
+                        /></div>
+                      </MarqueeSelection>
                       
                       
                   </div>
+                  
     }
-    
+    else if(this.state.userlist=='Schedulers'){
+      partials = <div>
+                    <div>
+
+                    <div className="" style={{ paddingTop: "16px"}}>
+                      <div className="">
+
+                    <Dropdown
+                        className='Dropdown-example'
+                        placeHolder='Select a Report Name'
+                        label=''
+                        id='Basicdrop1'
+                        ariaLabel='Basic dropdown example'
+                        options={_options}
+                        onChanged={ this._dropDownSelected }
+                        onBlur={ this._log('onBlur called') }
+                      
+                      />
+                      </div>
+                      <div className="">
+                          <div style={{paddingTop:"15px"}}>
+                            <input type="file" style={{backgroundColor: "initial"}} onChange={(e) => this.handleFileUpload(e.target)}  />
+                          </div>
+                      </div>    
+                    </div>
+                    <div  style={{ textAlign: "center"}}>
+                        <button type="button" id="uploadrepo" disabled={this.state.isDisabled} className="btn btn-danger" onClick={() => this.uploadattach(optionkey)}><i className="fa fa-upload"></i> &nbsp;Upload Report</button>
+                    </div>
+                    
+                    
+                </div>
+                <hr style={{borderTop: "1px solid #252323"}}/>
+                <div>
+                               
+                  <div dangerouslySetInnerHTML={{__html: this.state.areatree}} ></div>
+
+                
+                {/* <div style={{paddingTop:"15px"}} className='row'>
+                  <div className='col-md-4'><TextField
+                    id='areaid'
+                    placeholder='Filter by area'
+                     onChanged={ this._onChanged }
+                     /></div>
+                     <div  className='col-md-4'><TextField
+                     placeholder='Filter by division'
+                    id='divid'
+                    onChanged={ this._onChanged }
+                     /></div>
+                    <div  className='col-md-4'> <button type="button" style={{width:"45%",boxShadow:"rgba(10, 10, 10, 0.19) 0px 8px 15px"}} className="btn btn-primary" onClick={() => this._onstatusChanged('heyeyye')}>Filter</button></div>
+                </div> */}
+      
+
+                  <MarqueeSelection selection={ this._selection }>
+                  <div style={{paddingTop:"13px"}}>
+                  <DetailsList 
+                    
+                    items={ items }
+                    columns={ _columns }
+                    setKey='set'
+                    layoutMode={ DetailsListLayoutMode.fixedColumns }
+                    selection={ this._selection }
+                    selectionPreservedOnEmptyClick={ true }
+                    ariaLabelForSelectionColumn='Toggle selection'
+                    ariaLabelForSelectAllCheckbox='Toggle selection for all items'
+                    onItemInvoked={ this._onItemInvoked }
+                   
+                  /></div>
+                  </MarqueeSelection>
+              </div>
+              </div>
+    }
+   
     return (
       <div style={{visibility:"visible" ,background: "#f4f4f4",padding:"10px 12px 36px 12px",boxShadow:"2px 5px #a09f9f"}}>
           <div style={{ textAlign: "center", borderBottom:"1px dotted",paddingBottom:"15px"}}>
@@ -354,16 +507,16 @@ private uploadattach(optionkey): void {
      { this.setState({loader:<div style={{position:"fixed",left: "0",top: "0",zindex: "2000" ,width: "100%",height: "100%",overflow: "visible",background: "#333 url('http://files.mimoymima.com/images/loading.gif') no-repeat center center"}}></div>})
     
       let item = pnp.sp.web.lists.getByTitle("Schedule").items.getById(optionkey);
-      console.log('itemmmm',item.attachmentFiles.get());
+      //console.log('itemmmm',item.attachmentFiles.get());
       
         item.attachmentFiles.get().then(v => {
-          console.log(v,'names');
+         // console.log(v,'names');
           if(v.length){
               item.attachmentFiles.getByName(v[0].FileName).delete().then(ve => {
-               console.log(ve);
+              // console.log(ve);
                if(file){
                   item.attachmentFiles.add(file.name, myblob).then(vee => {
-                  console.log(vee);
+                  //console.log(vee);
                  
                   this.setState({ instance:  <div className="static-modal">
                                               <Modal.Dialog>
@@ -407,7 +560,7 @@ private uploadattach(optionkey): void {
           else if(v.length==0){
             if(file){
               item.attachmentFiles.add(file.name, myblob).then(v => {
-              console.log(v);
+              //console.log(v);
               this.setState({ instance:  <div className="static-modal">
               <Modal.Dialog>
                 <Modal.Header>
@@ -473,7 +626,7 @@ private uploadattach(optionkey): void {
   }
   private _log(str: string): () => void {
     return (): void => {
-      console.log(str);
+     // console.log(str);
     };
   }
   private _getSelectionDetails(): string {
@@ -486,7 +639,7 @@ private uploadattach(optionkey): void {
         return '1 item selected: ' + (this._selection.getSelection()[0] as any).name;
       default:
         return `${selectionCount} items selected`;
-    }
+    } 
   }
 
   @autobind
@@ -497,6 +650,7 @@ private uploadattach(optionkey): void {
   private _onstatusChanged(text: any): void {
     let areaval = (document.getElementById('areaid') as HTMLInputElement).value;
     let divval = (document.getElementById('divid') as HTMLInputElement).value;
+    //console.log(divval,areaval,'areavalareaval');
     //console.log(this.state.items.filter(i => i.division.toLowerCase().indexOf(divval) > -1 && i.area.toLowerCase().indexOf(areaval) > -1 ));
     this.setState({ items: this.state.items.filter(i => i.division.toLowerCase().indexOf(divval) > -1 && i.area.toLowerCase().indexOf(areaval) > -1 ) });
   }
@@ -505,8 +659,10 @@ private uploadattach(optionkey): void {
   private _onItemInvoked(item: any): void {
     //alert(`Item invoked: ${item.name}`);
   }
-
-
+ 
 }
-
+// (window as any).elementt=function(uiid){
+//   console.log('hee',uiid[0].id,uiid[1].id)
+  
+// }
 

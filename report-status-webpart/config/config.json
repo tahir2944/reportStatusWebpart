@@ -13,7 +13,7 @@
   },
   "externals": {
     "react-bootstrap":"https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.31.5/react-bootstrap.js"
-   
+    
     
   },
   "localizedResources": {
