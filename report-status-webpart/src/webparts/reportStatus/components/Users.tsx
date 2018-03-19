@@ -75,12 +75,7 @@ export class Users extends React.Component<IUsersProps, any>{
                         scheduleIDId:(document.getElementById('reportname') as any).value
                     }).then(r=>{document.getElementById('uploadrepo').innerHTML='<i class="fa fa-upload" style="font-size:16px" ></i>&nbsp;Upload Report';
                                 (document.getElementById('choosefile')as any).value='';
-                                pnp.sp.web.lists.getByTitle("Schedule").items
-                                .getById((document.getElementById('reportname') as any).value)
-                                .update({fileuploaded:(document.getElementById('reportname') as any).value})
-                                .then(i=>{this.dialog('File Uploaded Successfully','Success');})
-                                .catch(err => {this.dialog('Error occured please try again later.','Error');})
-                                })
+                                this.dialog('File Uploaded Successfully.','Success');})
                       .catch(err => {this.dialog('Error occured please try again later.','Error');});});
                 }).catch(err => {this.dialog('Error occured please try again later.','Error');});
     
