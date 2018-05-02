@@ -8,7 +8,7 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 import getData   from "./api/getData";
 import interfaceApi   from "./api/interfaceApi";
 import styles from './ReportStatus.module.scss';
-import * as logo from "../components/havellslogo.png";
+import * as logo from "../components/brandlogo.gif";
 import {Manager} from '../components/Manager';
 
 export interface IUsersProps {
@@ -32,7 +32,6 @@ export class Users extends React.Component<IUsersProps, any>{
     public componentWillMount(): void {  
         let getSchedule = new getData().getlistitem('Schedule');
         getSchedule.then((result) =>{
-           // this.setState({schedules:result});
             result= result.map((item,i)=>{return <option key={i} value={item.ID}>{item.Title}</option>})
             this.setState({reports:result});
             this.setState({loader:''});

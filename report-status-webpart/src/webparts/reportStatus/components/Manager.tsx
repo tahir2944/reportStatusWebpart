@@ -6,7 +6,7 @@ import * as $ from 'jquery';
 import {Breadcrumb,Button,Tooltip,Nav,NavItem,Modal,OverlayTrigger} from 'react-bootstrap';
 import { SPComponentLoader } from '@microsoft/sp-loader';
 import styles from './ReportStatus.module.scss';
-import * as logo from "../components/havellslogo.png";
+import * as logo from "../components/brandlogo.gif";
 
 export interface IManagerProps {
     user:any;
@@ -59,8 +59,7 @@ export class Manager extends React.Component<IManagerProps, any>{
                                     let joined = this.state._myitem.concat(item);
                                     (joined.length>1) ?joined= joined.sort((a,b) =>{return (new Date(a.props.children[5].props.children) > new Date(b.props.children[5].props.children)) ? 1 : (new Date(a.props.children[5].props.children) < new Date(b.props.children[5].props.children) ? -1 : 0);} ) :'';
                                     this.setState({_myitem:joined,loader:''});
-                                    this.setState({originalmyitem:this.state._myitem})
-                                   // console.log(this.state._myitem,'<><><><',this.state.originalmyitem)
+                                    this.setState({originalmyitem:this.state._myitem});
                                     });
                               });
                              
@@ -102,8 +101,10 @@ export class Manager extends React.Component<IManagerProps, any>{
         }
     }
     private downloadattach(val){
+        console.log(val)
         pnp.sp.web.lists.getByTitle("ScheduleReport").items.select('EncodedAbsUrl').filter("scheduleIDId eq "+val.ID+"")
         .orderBy("Modified",false).top(1).get().then(r => {
+            console.log(r,'r')
             window.open(r[0].EncodedAbsUrl,'_blank');
         });
     }
