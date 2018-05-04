@@ -11,37 +11,39 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@microsoft/sp-core-library": "~1.4.0",
-    "@microsoft/sp-lodash-subset": "~1.4.0",
-    "@microsoft/sp-office-ui-fabric-core": "~1.4.0",
-    "@microsoft/sp-webpart-base": "~1.4.0",
+    "@microsoft/sp-core-library": "^1.4.1",
+    "@microsoft/sp-loader": "^1.4.1",
+    "@microsoft/sp-lodash-subset": "^1.4.1",
+    "@microsoft/sp-office-ui-fabric-core": "^1.4.1",
+    "@microsoft/sp-webpart-base": "^1.4.1",
     "@types/bootbox": "^4.4.35",
     "@types/jquery": "^3.2.17",
     "@types/material-ui": "^0.20.0",
     "@types/materialize-css": "^1.0.1",
-    "@types/react": "15.6.6",
-    "@types/react-bootstrap": "^0.31.8",
-    "@types/react-dom": "15.5.6",
+    "@types/react": "^15.6.6",
+    "@types/react-bootstrap": "^0.31.9",
+    "@types/react-dom": "^15.5.6",
     "@types/react-mdl": "^1.7.25",
-    "@types/webpack-env": ">=1.12.1 <1.14.0",
+    "@types/webpack-env": "^1.13.6",
     "bootbox": "^4.4.0",
     "bootstrap": "^3.3.7",
-    "jquery": "^3.2.1",
+    "jquery": "^3.3.1",
     "material-ui": "^0.20.0",
+    "office-ui-fabric-react": "^5.92.1",
     "react": "^15.6.2",
     "react-bootstrap": "^0.31.5",
     "react-dom": "^15.6.2",
     "react-md": "^1.2.9",
     "react-mdl": "^1.11.0",
-    "sp-pnp-js": "^3.0.2"
+    "sp-pnp-js": "^3.0.7"
   },
   "devDependencies": {
-    "@microsoft/sp-build-web": "~1.4.0",
+    "@microsoft/sp-build-web": "^1.4.1",
     "@microsoft/sp-module-interfaces": "~1.4.0",
-    "@microsoft/sp-webpart-workbench": "~1.4.0",
-    "gulp": "~3.9.1",
+    "@microsoft/sp-webpart-workbench": "^1.4.1",
     "@types/chai": ">=3.4.34 <3.6.0",
     "@types/mocha": ">=2.2.33 <2.6.0",
-    "ajv": "~5.2.2"
+    "ajv": "~5.2.2",
+    "gulp": "^3.9.1"
   }
 }
