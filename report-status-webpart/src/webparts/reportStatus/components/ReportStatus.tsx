@@ -28,7 +28,8 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
       result= result.map(mail => mail.Email);
       (result.indexOf(this.props.usermail)>-1) ? this.setState({showscreen:'Schedulers'}) : '' 
     });
-    let getusergroup = new getData().checkusergroup('User');
+     //let getusergroup = new getData().checkusergroup('User');
+    let getusergroup = new getData().checkusergroup('users');
     getusergroup.then((result) =>{
       result= result.map(mail => mail.Email);
       (result.indexOf(this.props.usermail)>-1) ? this.setState({showscreen:'user'}) : '' 
@@ -38,7 +39,9 @@ export default class ReportStatus extends React.Component<IReportStatusProps, an
   public render(): React.ReactElement<IReportStatusProps> {
     return (
         <div>
-        {this.state.showscreen=='manager'?<Manager user=""/>:this.state.showscreen=='user'?<Users />:this.state.showscreen=='Schedulers'?<Schedulers />:'Please assign yourself in a group'}
+        {/* {this.state.showscreen=='manager'?<Manager user=""/>:this.state.showscreen=='user'?<Users />:this.state.showscreen=='Schedulers'?<Schedulers />:'Please assign yourself in a group'} */}
+        {this.state.showscreen=='manager'?<Manager user=""/>:(this.state.showscreen=='user'|| this.state.showscreen=='Schedulers')?<Users />:'Please assign yourself in a group'}
+
         </div>
     );
   }

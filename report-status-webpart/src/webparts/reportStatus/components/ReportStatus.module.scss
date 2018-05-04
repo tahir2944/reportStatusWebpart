@@ -1,5 +1,25 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
-
+.searchdiv{
+  margin-bottom: 5px;
+  text-align: right;
+}
+.searchbox{
+  padding: 10px !important;
+  width:43%;
+  font-family:FontAwesome,Arial !important;
+}
+.filterheader{
+  background: #ccd5e6;
+  padding: 9px;
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+.filterlis{
+  background: #a8d4d0;
+  padding: 4px;
+  margin-bottom: 1px;
+  cursor: pointer;
+}
 .statusgreen{
   background: #3b923b;
   color: #fff;
@@ -19,11 +39,12 @@
   border: none;
   box-shadow: rgb(206, 207, 210) 0px 3px 12px 2px;
   background: white;
+  font-size: 5px;
 }
 .loader{
   position:fixed;
-  left: 50%;
-  top: 42%;
+  left: 42%;
+  top: 36%;
   z-index: 9999 ;
   width: 160px;
   height: 175px;
